@@ -6,30 +6,46 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import 'react-native-gesture-handler'
-import { NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaView, StyleSheet, Text } from 'react-native';
 import HomePage from './src/views/HomePage';
 import Favorites from './src/views/Favorites';
 import Setup from './src/views/Setup'
-const Stack = createNativeStackNavigator();
+import Footer from './src/components/Footer';
+import { ImageBackground, StatusBar, StyleSheet } from 'react-native';
+import { CardStyleInterpolators, TransitionPresets, TransitionSpecs } from '@react-navigation/stack';
+import { WeatherContext } from './src/context/weatherContext';
 
 export default function App() {
+  const Stack = createNativeStackNavigator();
+  const [data, setData] = useState([{}]);
+
+  const value = {
+    data,
+    setData,
+  }
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name='Home' component={HomePage} />
-        <Stack.Screen name='Favorites' component={Favorites} />
-        <Stack.Screen name='Setup' component={Setup} />
-      </Stack.Navigator>
+    <WeatherContext.Provider value={value}>
+    <NavigationContainer theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, background: 'transparent' } }}>
+      <ImageBackground source={require("./assets/images/sun-night.jpeg")} resizeMode="cover" style={styles.image}>
+        <StatusBar barStyle={'dark-content'} />
+        <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: true, gestureDirection: "horizontal", cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }}>
+          <Stack.Screen name='Home' component={HomePage} />
+          <Stack.Screen options={{ animation: "simple_push" }} name='Favorites' component={Favorites} />
+          <Stack.Screen options={{ animation: "slide_from_left" }} name='Setup' component={Setup} />
+        </Stack.Navigator>
+        <Footer />
+      </ImageBackground>
     </NavigationContainer>
+    </WeatherContext.Provider>
   );
 };
 
 const styles = StyleSheet.create({
-  body: {
-    paddingHorizontal: 20,
-  }
-});
+  image: {
+    flex: 1,
+  },
+})
