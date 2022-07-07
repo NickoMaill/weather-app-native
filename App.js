@@ -15,31 +15,35 @@ import Favorites from './src/views/Favorites';
 import Setup from './src/views/Setup'
 import Footer from './src/components/Footer';
 import { ImageBackground, StatusBar, StyleSheet } from 'react-native';
-import { CardStyleInterpolators, TransitionPresets, TransitionSpecs } from '@react-navigation/stack';
+import { CardStyleInterpolators } from '@react-navigation/stack';
 import { WeatherContext } from './src/context/weatherContext';
+import { displayBackground } from './src/utils/displayWeatherPic';
 
 export default function App() {
   const Stack = createNativeStackNavigator();
   const [data, setData] = useState([{}]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const value = {
     data,
     setData,
+    isLoading,
+    setIsLoading
   }
 
   return (
     <WeatherContext.Provider value={value}>
-    <NavigationContainer theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, background: 'transparent' } }}>
-      <ImageBackground source={require("./assets/images/sun-night.jpeg")} resizeMode="cover" style={styles.image}>
-        <StatusBar barStyle={'dark-content'} />
-        <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: true, gestureDirection: "horizontal", cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }}>
-          <Stack.Screen name='Home' component={HomePage} />
-          <Stack.Screen options={{ animation: "simple_push" }} name='Favorites' component={Favorites} />
-          <Stack.Screen options={{ animation: "slide_from_left" }} name='Setup' component={Setup} />
-        </Stack.Navigator>
-        <Footer />
-      </ImageBackground>
-    </NavigationContainer>
+      <NavigationContainer theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, background: 'transparent' } }}>
+        <ImageBackground source={displayBackground(data.list[0].weather[0].icon)} resizeMode="cover" style={styles.image}>
+          <StatusBar barStyle={'dark-content'} />
+          <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: true, gestureDirection: "horizontal", cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }}>
+            <Stack.Screen name='Home' component={HomePage} />
+            <Stack.Screen options={{ animation: "simple_push" }} name='Favorites' component={Favorites} />
+            <Stack.Screen options={{ animation: "slide_from_left" }} name='Setup' component={Setup} />
+          </Stack.Navigator>
+          <Footer />
+        </ImageBackground>
+      </NavigationContainer>
     </WeatherContext.Provider>
   );
 };

@@ -8,6 +8,7 @@ import { WeatherContext } from '../context/weatherContext';
 import WeatherDetails from '../components/WeatherDetails';
 import MainWeather from '../components/MainWeather';
 import SearchBar from '../components/SearchBar';
+import ForecastWeather from '../components/ForecastWeather';
 
 export default function HomePage() {
   const navigation = useNavigation();
@@ -15,11 +16,11 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const getWeather = async () => {
-    setIsLoading(true);
+    Context.setIsLoading(true)
     const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=paris&appid=23835421f51d272a90553849c92a284e&lang=fr&units=metric`)
     const data = await response.json().then((res) => {
       Context.setData(res);
-    }).finally(() => setIsLoading(false))
+    }).finally(() => Context.setIsLoading(false))
       .catch((err) => {
         console.error(err);
       })
@@ -46,13 +47,14 @@ export default function HomePage() {
     <GestureRecognizer style={{ flex: 1 }} onSwipe={onSwipe}>
       <SafeAreaView style={styles.body}>
         <View>
-          <SearchBar/>
-          {isLoading ? (
+          <SearchBar />
+          {Context.isLoading ? (
             <ActivityIndicator size="large" />
           ) : (
             <View>
               <MainWeather />
               <WeatherDetails />
+              <ForecastWeather />
             </View>
           )}
         </View>
