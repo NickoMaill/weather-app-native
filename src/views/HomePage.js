@@ -1,29 +1,62 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AppState, Dimensions, SafeAreaView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
-import Title from '../components/Title';
-import { displayPic } from '../utils/displayWeatherPic';
 import { WeatherContext } from '../context/weatherContext';
 import WeatherDetails from '../components/WeatherDetails';
 import MainWeather from '../components/MainWeather';
 import SearchBar from '../components/SearchBar';
 import ForecastWeather from '../components/ForecastWeather';
+import Sunrise from '../components/Sunrise';
+import Spinner from 'react-native-spinkit'
+import { getWeather } from '../utils/weatherRequest';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addToStorage, deleteFromStorage, getStorage } from '../utils/asyncStorage';
 
 export default function HomePage() {
   const navigation = useNavigation();
-  const Context = useContext(WeatherContext)
-  const [isLoading, setIsLoading] = useState(true);
+  const Context = useContext(WeatherContext);
+  const cityName = !Context.isLoading && Context.data.city.name;
+  const [metric, setMetric] = useState(true);
+  const [isFavorites, setIsFavorites] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const [search, setSearch] = useState("");
 
-  const getWeather = async () => {
-    Context.setIsLoading(true)
-    const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=paris&appid=23835421f51d272a90553849c92a284e&lang=fr&units=metric`)
-    const data = await response.json().then((res) => {
-      Context.setData(res);
-    }).finally(() => Context.setIsLoading(false))
-      .catch((err) => {
-        console.error(err);
+  const { width, height } = Dimensions.get("window");
+
+  const onMetricChange = () => {
+    setMetric(!metric);
+  }
+
+  const onFavoriteChange = () => {
+    setIsFavorites(!isFavorites)
+  }
+
+  const weatherRes = async (city, units, e) => {
+    // e.preventDefault();
+    Context.setIsLoading(true);
+    setIsFavorites(false)
+    getWeather(city, units)
+      .then((res) => {
+        if (res.cod === '404') {
+
+        } else {
+          Context.setData(res)
+        }
       })
+      .finally(() => {
+        Context.setIsLoading(false);
+        setSearch("");
+      })
+  };
+
+  const checkFavorites = async () => {
+    getStorage("@favorites").then((res) => {
+      setFavorites(res)
+      if (res.includes(cityName)) {
+        setIsFavorites(true);
+      }
+    });
   }
 
   const onSwipe = (gestureName, gestureState) => {
@@ -40,21 +73,62 @@ export default function HomePage() {
   }
 
   useEffect(() => {
-    getWeather()
+    AppState.addEventListener("change", state => {
+      if (state === "active") {
+        weatherRes();
+      }
+    })
   }, [])
+
+  useEffect(() => {
+    if (!Context.isLoading) {
+      checkFavorites();
+    }
+  }, [Context.isLoading])
+
+  useEffect(() => {
+    if (metric) {
+      weatherRes(cityName, "metric")
+    } else {
+      weatherRes(cityName, "imperial")
+    }
+  }, [metric])
+
+  useEffect(() => {
+    if (!Context.isLoading) {
+      if (isFavorites && favorites.indexOf(Context.data.city.name) < 0) {
+        addToStorage("@favorites", Context.data.city.name, favorites)
+      }
+
+      if (!isFavorites && favorites.indexOf(Context.data.city.name) !== -1) {
+        deleteFromStorage("@favorites", Context.data.city.name, favorites)
+      }
+
+    }
+  }, [isFavorites])
+
 
   return (
     <GestureRecognizer style={{ flex: 1 }} onSwipe={onSwipe}>
       <SafeAreaView style={styles.body}>
         <View>
-          <SearchBar />
+
+          <SearchBar value={search} onPress={() => weatherRes(search, "metric")} onChange={(e) => setSearch(e)} />
           {Context.isLoading ? (
-            <ActivityIndicator size="large" />
+            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+              <Spinner type='Bounce' size={200} color="#f1f1f1f1" style={{ marginTop: height / 3.5 }} />
+            </View>
           ) : (
             <View>
-              <MainWeather />
+              <MainWeather
+                valueMetric={metric}
+                onChangeMetric={onMetricChange}
+                valueFavorites={isFavorites}
+                onChangeFavorites={onFavoriteChange}
+              />
               <WeatherDetails />
               <ForecastWeather />
+              <Sunrise />
             </View>
           )}
         </View>
@@ -65,7 +139,6 @@ export default function HomePage() {
 
 const styles = StyleSheet.create({
   body: {
-    flexDirection: "column",
     marginHorizontal: 10,
   },
   imageStyle: {

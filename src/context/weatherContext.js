@@ -1,6 +1,7 @@
 import { createContext } from "react";
 
 export const WeatherContext = createContext({
-    data: [{}],
+    data: {},
     isLoading: true,
+    favorites: [],
 })

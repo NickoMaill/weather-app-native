@@ -6,12 +6,14 @@ import WeatherInfo from './WeatherInfo'
 
 export default function WeatherDetails() {
     const Context = useContext(WeatherContext)
+    const data = Context.data;
+
     return (
         <View style={styles.infoGroup}>
-            <WeatherInfo data={Math.round(Context.data.list[0].main.temp_min) + "°"} icon={require(`../../assets/icons/minTemp.png`)}/>
-            <WeatherInfo data={Math.round(Context.data.list[0].main.temp_max) + "°"} icon={require(`../../assets/icons/maxTemp.png`)}/>
-            <WeatherInfo data={Context.data.list[0].main.humidity + " %"} icon={require(`../../assets/icons/drop.png`)}/>
-            <WeatherInfo data={Context.data.list[0].wind.speed + " ms"} icon={require(`../../assets/icons/wind.png`)}/>
+            <WeatherInfo data={Math.round(data.list[0].main.temp_min) + "°"} icon={require(`../../assets/icons/minTemp.png`)}/>
+            <WeatherInfo data={Math.round(data.list[0].main.temp_max) + "°"} icon={require(`../../assets/icons/maxTemp.png`)}/>
+            <WeatherInfo data={data.list[0].main.humidity + " %"} icon={require(`../../assets/icons/drop.png`)}/>
+            <WeatherInfo data={data.list[0].wind.speed + " m/s"} icon={require(`../../assets/icons/wind.png`)}/>
         </View>
     )
 }

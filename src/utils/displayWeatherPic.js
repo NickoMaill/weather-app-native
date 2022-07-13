@@ -37,7 +37,7 @@ export const displayPic = (picCode) => {
         case "50n":
             return require("../../assets/icons/mist.png");
         default:
-            break;
+            return require("../../assets/icons/mist.png");
     }
 }
 
@@ -80,6 +80,6 @@ export const displayBackground = (picCode) =>{
         case "50n":
             return require("../../assets/icons/mist.png");
         default:
-            break;
+            return require("../../assets/icons/mist.png");
     }
 }

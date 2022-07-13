@@ -8,11 +8,12 @@ import ForecastWeatherDetails from './ForecastWeatherDetails';
 export default function ForecastWeather() {
     const Context = useContext(WeatherContext);
     const [forecast, setForecast] = useState([]);
+    const data = Context.data;
 
 
     const forecastDetails = () => {
         const tempArray = []
-        Context.data.list.map((day, i) => {
+        data.list.map((day) => {
             const date = new Date(day.dt * 1000);
             if (date.getDate() !== new Date().getDate()) {
                 if (date.getHours() === 14) {
