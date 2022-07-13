@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { AppState, Dimensions, SafeAreaView, StyleSheet, View } from 'react-native';
+import { AppState, Dimensions, Keyboard, SafeAreaView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
 import { WeatherContext } from '../context/weatherContext';
@@ -10,7 +10,6 @@ import ForecastWeather from '../components/ForecastWeather';
 import Sunrise from '../components/Sunrise';
 import Spinner from 'react-native-spinkit'
 import { getWeather } from '../utils/weatherRequest';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addToStorage, deleteFromStorage, getStorage } from '../utils/asyncStorage';
 
 export default function HomePage() {
@@ -73,6 +72,7 @@ export default function HomePage() {
   }
 
   useEffect(() => {
+    console.log("homepage");
     AppState.addEventListener("change", state => {
       if (state === "active") {
         weatherRes();
@@ -113,7 +113,7 @@ export default function HomePage() {
       <SafeAreaView style={styles.body}>
         <View>
 
-          <SearchBar value={search} onPress={() => weatherRes(search, "metric")} onChange={(e) => setSearch(e)} />
+          <SearchBar value={search} onPress={() => {weatherRes(search, "metric"); Keyboard.dismiss()}} onChange={(e) => setSearch(e)} />
           {Context.isLoading ? (
             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
               <Spinner type='Bounce' size={200} color="#f1f1f1f1" style={{ marginTop: height / 3.5 }} />

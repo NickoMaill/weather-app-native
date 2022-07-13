@@ -26,7 +26,6 @@ export default function App() {
   const [data, setData] = useState([{}]);
   const [isLoading, setIsLoading] = useState(true);
   const [favorites, setFavorites] = useState([])
-  console.log("data", data.cod);
 
   const value = {
     data,
